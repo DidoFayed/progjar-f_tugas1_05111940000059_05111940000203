@@ -18,14 +18,6 @@ def accFile(conn, namaFile, sizeFile):
     rf.close()
 
 
-def splitData(received_data):
-    namaFile, sizeFile = received_data.split(",\n")
-    title_name, namaFile = namaFile.split(":")
-    sizeFile = int(''.join(filter(str.isdigit, sizeFile)))
-
-    return namaFile, str(sizeFile)
-
-
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     s.connect(('192.168.0.1', 5000))
     print('--', end=' ', flush=True)
@@ -35,15 +27,19 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             message = sys.stdin.readline()
             s.send(bytes(message, FORMAT))
             received_data = s.recv(1024).decode(FORMAT)
-            if received_data == 'File tidak dapat ditemukan':
+
+            if received_data == 'File tidak dapat ditemukan' or 'Perintah salah. Masukkan dengan format: unduh nama_file':
                 print(received_data)
-            elif received_data == 'Perintah salah. Masukkan dengan format: unduh nama_file':
-                print(received_data)
+
             else:
-                namaFile, sizeFile = splitData(received_data)
+                namaFile, sizeFile = received_data.split(",\n")
+                title_name, namaFile = namaFile.split(":")
+                sizeFile = int(''.join(filter(str.isdigit, sizeFile)))
+                size = str(sizeFile)
+
                 print("File-name:", namaFile)
-                print("File-Size:", sizeFile)
-                accFile(s, namaFile, sizeFile)
+                print("File-size:", size)
+                accFile(s, namaFile, size)
 
             print('--', flush=True, end=' ')
 
